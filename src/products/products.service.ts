@@ -30,8 +30,19 @@ export class ProductsService {
     return productFound;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    const productUpdated = await this.prismaService.product.update({
+      where: {
+        id,
+      },
+      data: updateProductDto,
+    });
+
+    if (!productUpdated) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return productUpdated;
   }
 
   async remove(id: number) {
