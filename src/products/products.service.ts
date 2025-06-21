@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -25,6 +26,8 @@ export class ProductsService {
           );
         }
       }
+
+      throw new InternalServerErrorException();
     }
   }
 
@@ -61,16 +64,14 @@ export class ProductsService {
   }
 
   async remove(id: number) {
-    const deleteProduct = await this.prismaService.product.delete({
-      where: {
-        id,
-      },
+    const product = await this.prismaService.product.findUnique({
+      where: { id },
     });
 
-    if (!deleteProduct) {
+    if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    return deleteProduct;
+    return this.prismaService.product.delete({ where: { id } });
   }
 }
